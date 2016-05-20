@@ -1,0 +1,148 @@
+/**
+ * Created by xiaobin on 2016/5/16.
+ */
+var rs_line_start = false;
+var rs_line_drawing = "";
+var rs_line_start_pos = {};
+var task_starter = "";
+$(document).ready(function(){
+    $(".menu-task").draggable({helper: 'clone'});
+
+    var currentMousePos = { x: -1, y: -1 };
+   $(document).mousemove(function(event) {
+        currentMousePos.x = event.pageX;
+        currentMousePos.y = event.pageY;
+
+       if(rs_line_start==true){
+           var trans4ContainerPos = transferPagePos2ParentPos(event.pageX, event.pageY,$(rs_line_drawing).parent());
+           $("#mouseX").val(trans4ContainerPos.x);
+           $("#mouseY").val(trans4ContainerPos.y);
+//           console.log("draw line.....rs_line_start="+rs_line_start);
+           var x1 = trans4ContainerPos.x;
+           var y1 = trans4ContainerPos.y;
+           var x2 = rs_line_start_pos.x;
+           var y2 = rs_line_start_pos.y;
+
+           var hypotenuse = Math.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2));
+           var angle = Math.atan2((y1-y2), (x1-x2)) *  (180/Math.PI);
+           if(angle >= 90 && angle < 180){
+               y1 = y1 - (y1-y2);
+           }
+           if(angle > 0 && angle < 90){
+               x1 = x1 - (x1-x2);
+               y1 = y1 - (y1-y2);
+           }
+           if(angle <= 0 && angle > -90){
+               x1 = x1 - (x1-x2);
+           }
+//           console.log("top:"+$(rs_line_drawing).position().top+", left:"+$(rs_line_drawing).position().left);
+           $(rs_line_drawing).queue(function(){
+               $(this).css({top: y1, left: x1});
+               $(this).dequeue();
+           }).queue(function(){
+               $(this).width(hypotenuse);
+               $(this).dequeue();
+           }).queue(function(){
+               $(this).rotate(angle);
+               $(this).dequeue();
+           });
+       }
+    });
+    $(document).mousedown(function(event){
+        if(rs_line_start){
+            rs_line_start = false;
+        }
+    });
+
+    $(".rscontainer").droppable({
+        drop: function(event, ui) {
+//            var dropOffsetX = event.pageX;
+//            var dropOffsetY = event.pageY;
+//            var this_offset = $(this).offset();
+//            var this_topY = this_offset.top;
+//            var this_leftX = this_offset.left;
+            var trans4ContainerPos = transferPagePos2ContainerPos(event.pageX, event.pageY);
+            var task_width = ui.draggable.context.clientWidth;
+            var task_height = ui.draggable.context.clientHeight;
+//            var pos_x = dropOffsetX-this_leftX-task_width/2;
+//            var pos_y = dropOffsetY-this_topY-task_height/2;
+            var pos_x = trans4ContainerPos.x-task_width/2;
+            var pos_y = trans4ContainerPos.y-task_height/2;
+
+            var clone_div = $(ui.draggable).clone();
+            var div_id = clone_div.attr("id");
+            if(div_id!=undefined){
+                return;
+            }
+            div_id = new Date().getTime();
+            clone_div.attr("id", div_id);
+            var arrow_div = $("<div>").addClass("rs-arrow-right").append("<img src='../images/arrow_right.png'>").attr("starter",div_id);
+            arrow_div.on("click",function(){
+                drawLineBegin(this);
+            });
+            arrow_div.css({"top":pos_y+task_height-15, "left":pos_x+task_width-23});
+            $(this).append(arrow_div);
+            $(this).append(clone_div);
+            clone_div.removeClass("menu-task").css({"top":pos_y, "left":pos_x});
+
+            clone_div.draggable({helper:'original'});
+            clone_div.on("click",function(){
+                console.log($(this).attr("id"));
+            });
+        }
+    });
+
+    var transferPagePos2ContainerPos = function(pageX_,pageY_){
+        var container_offset = $(".rscontainer").offset();
+        var transPos = {};
+        transPos.x = pageX_ - container_offset.left;
+        transPos.y = pageY_ - container_offset.top;
+        return transPos;
+    }
+    var transferPagePos2ParentPos = function(pageX_,pageY_, target_){
+        var container_offset = $(target_).offset();
+        var transPos = {};
+        transPos.x = pageX_ - container_offset.left;
+        transPos.y = pageY_ - container_offset.top;
+        return transPos;
+    }
+    var drawLineBegin = function(obj){
+        console.log("drawLineBegin...");
+        var parent_ = $(obj).parent();
+        var starter_id = $(obj).attr("starter");
+//        var starter = $("#"+starter_id).position();//v1
+        var starter = $("#"+starter_id);//v1
+
+//        var parent_pos = parent_.position();
+        var parent_dom = document.getElementById(starter_id);
+//        var begin_top = parent_dom.clientHeight;
+//        var begin_left = parent_dom.clientWidth/2;
+
+//        var begin_top = starter.top+parent_dom.clientHeight;//v1
+//        var begin_left = starter.left+parent_dom.clientWidth/2;//v1
+
+        var begin_top = starter.offset().top+parent_dom.clientHeight;
+        var begin_left = starter.offset().left+parent_dom.clientWidth/2;
+        var rs_line = $("<div>").addClass("rs-line");
+        parent_.append(rs_line);
+        $(rs_line).queue(function(){
+            $(this).css({top: begin_top, left: begin_left});
+            $(this).dequeue();
+        });
+        rs_line_drawing = rs_line;
+
+        rs_line_start_pos.x = begin_left;
+        rs_line_start_pos.y = begin_top;
+        rs_line_start = true;
+    }
+
+
+    /*$(".rscontainer").find(".start-task,.user-task").each(function(){
+        $(this).on("click",function(){
+            console.log($(this).attr("id"));
+        });
+    })*/
+//    $(".rs-line-menu").on("click",function(){
+//        rs_line_start = true;
+//    });
+});
