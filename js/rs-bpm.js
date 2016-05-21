@@ -211,27 +211,27 @@ function newProperty(){
 function editActivity(id_){
     var activity = $("#"+id_);
     var dialog_div = $("<div>").attr("id","dialog-form").attr("title","Edit Activity");
-    var table_ = $("<table id=\"propertyTable\">")
-        .append("<tr><td>Description:</td>"
-            +"<td><input type=\"text\" id=\"descp\" value=\""+activity.find("label").html()+"\"></td>"
-            +"</tr>"
-        )
-        /*.append("<tr><td>Assigner:</td>"
-            +"<td><input type=\"text\" id=\"descp\" value=\""+activity.find("label").html()+"\"><a  onclick=\"\" title=\"Search\"><img src=\"../images/search.png\"></a></td>"
-            +"</tr>")*/
-
-        ;
-    dialog_div.append(table_);
-    dialog_div.append("<input type=\"button\" value=\"Add property\" onclick=\"newProperty()\"");
-    dialog_div.append("<input type=\"button\" value=\"Confirm Add\" onclick=\"addProperty()\"");
+    $.get("../template/activityProperties.html", function(data){
+        data = data.replace("#activityDescp", activity.find("label").html());
+        dialog_div.append(data);
+    });
 
     dialog_div.dialog({
         autoOpen: false,
         height: 300,
-        width: 350,
+        width: 600,
         modal: true,
         buttons: {
-            "Create an account": function () {
+            "New Property": function () {
+                $("#propertyTable")
+                    .append("<tr>"
+                        +"<td><input type=\"text\" name=\"newPropertyName\" placeholder='Property Name'></td>"
+                        +"<td><input type=\"text\" name=\"newPropertyType\" placeholder='Property Type'></td>"
+                        +"<td><input type=\"text\" name=\"newPropertyValue\" placeholder='Property Value'></td>"
+                        +"</tr>");
+            },
+            "Save":function(){
+
             },
             Cancel: function () {
                 $(this).dialog("close");
@@ -283,3 +283,7 @@ function editCondition(id_){
     });
     $(dialog_div).dialog( "open" );
 }
+
+$.get("../template/contextMenu.html",function(data){
+    $("#context_menu_include").html(data);
+})
