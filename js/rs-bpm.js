@@ -12,7 +12,7 @@ jsPlumb.ready(function () {
             var pos_y = trans4ContainerPos.y-task_height/2;
             var clone_div = $(ui.draggable).clone();
             var div_id = clone_div.attr("id");
-            if(div_id!=undefined){
+            if(div_id!=undefined || clone_div.hasClass("ui-dialog")){
                 return;
             }
             div_id = new Date().getTime();
@@ -22,11 +22,12 @@ jsPlumb.ready(function () {
             clone_div.contextMenu({
                 menu: 'activityMenu'
             }, function(action, el, pos) {
+                var id_ = $(el).attr("id");
                 if (action == 'edit') {
-                    console.log("edit");
+                    editActivity(id_);
                 }
                 else if (action == 'delete') {
-                    instance.remove($(el).attr("id"));
+                    instance.remove(id_);
                 }
             })
             initNode(clone_div);
@@ -191,6 +192,9 @@ jsPlumb.ready(function () {
         return false;
     });
 
+    $("#removeAll").on("click",function(){
+        instance.empty("canvas");
+    })
 });
 function newProperty(){
     var tr_1 = $("<tr>");
