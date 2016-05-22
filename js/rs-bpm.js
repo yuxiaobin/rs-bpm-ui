@@ -222,19 +222,28 @@ function editActivity(id_){
         width: 600,
         modal: true,
         buttons: {
-            "New Property": function () {
+            /*"New Property": function () {
                 $("#propertyTable")
                     .append("<tr>"
                         +"<td><input type=\"text\" name=\"newPropertyName\" placeholder='Property Name'></td>"
-                        +"<td><input type=\"text\" name=\"newPropertyType\" placeholder='Property Type'></td>"
+                        +"<td><select name=\"newPropertyType\">"
+                        +"<option value='String'>String</option>"
+                        +"<option value='Integer'>Integer</option>"
+                        +"<option value='Boolean'>Boolean</option>"
+                        +"<option value='Date'>Date</option>"
+                        +"<option value='Enum'>Enum</option>"
+                        +"<option value='User'>User</option>"
+                        +"<option value='Group'>Group</option>"
+                        +"</select>"
+                        +"</td>"
                         +"<td><input type=\"text\" name=\"newPropertyValue\" placeholder='Property Value'></td>"
                         +"</tr>");
-            },
+            },*/
             "Save":function(){
-
+                alert("TODO: save");
             },
             Cancel: function () {
-                $(this).dialog("close");
+                $(this).dialog("destroy");
             }
         },
         close: function() {
