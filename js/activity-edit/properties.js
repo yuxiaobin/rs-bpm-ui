@@ -17,13 +17,17 @@ var newProperty = function(){
         +"<option value='Group'>Group</option>"
         +"</select>"
         +"</td>"
-        +"<td class=\"dy string\"><input type=\"text\" name=\"newPropertyValue\"></td>"
+        +"<td class=\"dy string\"><input type=\"text\" name=\"newPropertyValue\">"
+        +"<div class=\"close_span\" onclick=\"removeProperty(this)\">x</div>"
+        +"</td>"
         +"<td class=\"dy boolean\" style=\"display:none\">" +
         "<input type=\"radio\" name=\"newPropertyValue\" value=\"true\">" +
         "<input type=\"radio\" name=\"newPropertyValue\" value=\"false\">" +
         "</td>"
         +"<td class=\"dy enum\" style=\"display:none\"><input type=\"text\" name=\"newPropertyValue\" placeholder='enum todo'></td>"
-        +"<td class=\"dy date\" style=\"display:none\"><input type=\"text\" name=\"newPropertyValue\"></td>"
+        +"<td class=\"dy date\" style=\"display:none\"><input type=\"text\" name=\"newPropertyValue\">"
+
+        +"</td>"
         +"</tr>");
 }
 var changePropertyType = function(obj){
@@ -57,4 +61,10 @@ var changePropertyType = function(obj){
             }
         });
     }
+}
+
+var removeProperty = function(obj){
+    var selectedTr = $(obj).parents("tr");
+//    console.log(selectedTr);
+    selectedTr.remove();
 }

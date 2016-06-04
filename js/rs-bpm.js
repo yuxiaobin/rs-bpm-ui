@@ -196,7 +196,7 @@ jsPlumb.ready(function () {
         instance.empty("canvas");
     })
 });
-function newProperty(){
+/*function newProperty(){
     var tr_1 = $("<tr>");
     var td_11 = $("<td>").append("Property Name:");
     var td_12 = $("<td>").append("<input type='text' name='propertyName' id='propertyName'>");
@@ -207,7 +207,7 @@ function newProperty(){
     tr_2.append(td_21).append(td_22);
 
     $("#propertyTable").append(tr_1).append(tr_2);
-}
+}*/
 function editActivity(id_){
     var activity = $("#"+id_);
     var dialog_div = $("<div>").attr("id","dialog-form").attr("title","Edit Activity");
@@ -266,7 +266,7 @@ function editCondition(id_){
                 +"</tr>"
         )
             .append("<tr><td>Condition:</td>"
-                +"<td><input type=\"text\" id=\"descp\" value=\""+condition_exp+"\"></td>"
+                +"<td><input type=\"text\" id=\"conditionId\" value=\""+condition_exp+"\"></td>"
                 +"</tr>")
             .append("<tr><td></td>"
                 +"<td>For example:Available name defined as \"count\", then the value here should be like: count>100</td>"
@@ -280,7 +280,8 @@ function editCondition(id_){
         width: 350,
         modal: true,
         buttons: {
-            "Create an account": function () {
+            "Save": function () {
+
             },
             Cancel: function () {
                 $(this).dialog("close");
