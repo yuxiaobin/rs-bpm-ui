@@ -6,7 +6,7 @@ var PROPERTY_TYPE_ENUM = "Enum";
 var PROPERTY_TYPE_DATE = "Date";
 var newProperty = function(){
     $("#propertyTable").append("<tr>"
-        +"<td><input type=\"text\" name=\"newPropertyName\" placeholder='Property Name'></td>"
+        +"<td><input type=\"text\" name=\"newPropertyName\" class=\"newPropertyName\"placeholder='Property Name'></td>"
         +"<td><select name=\"newPropertyType\" onchange='changePropertyType(this)'>"
         +"<option value='String'>String</option>"
         +"<option value='Integer'>Integer</option>"

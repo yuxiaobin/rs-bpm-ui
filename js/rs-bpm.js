@@ -1,5 +1,5 @@
 var connectionSet = [];
-
+var variableSet = [];//activityId:[propertyArray(name,type,value)]
 jsPlumb.ready(function () {
 
     $(".menu-task").draggable({helper: 'clone'});
@@ -210,7 +210,7 @@ jsPlumb.ready(function () {
 }*/
 function editActivity(id_){
     var activity = $("#"+id_);
-    var dialog_div = $("<div>").attr("id","dialog-form").attr("title","Edit Activity");
+    var dialog_div = $("<div>").attr("id","dialog-form").attr("title","Edit Activity").attr("activityId",id_);
     $.get("../template/activityProperties.html", function(data){
         data = data.replace("#activityDescp", activity.find("label").html());
         dialog_div.append(data);
@@ -240,7 +240,24 @@ function editActivity(id_){
                         +"</tr>");
             },*/
             "Save":function(){
-                alert("TODO: save");
+                var activityDescp = $("#activityDescp").val();
+                var activityId_ = $("#dialog-form").attr("activityId");
+                variableSet = $.grep(variableSet, function(value) {
+                    return value.activityId != activityId_;//remove same activityId
+                });
+                var proArray = [];
+                $(".newPropertyName").each(function(){
+                    var property_ = $(this);
+                    var selection_ = property_.parent().siblings("td:has(select)").children();
+                    var textbox_ = property_.parent().siblings("td:has(input:text):visible").children();
+                    proArray[proArray.length]={
+                        name:property_.val(),
+                        type:selection_.val(),
+                        value:textbox_.val()
+                    };
+                });
+                variableSet.push({activityId :activityId_ , properties:proArray});
+                $(this).dialog("destroy");
             },
             Cancel: function () {
                 $(this).dialog("destroy");
@@ -284,7 +301,7 @@ function editCondition(id_){
 
             },
             Cancel: function () {
-                $(this).dialog("close");
+                $(this).dialog("destroy");
             }
         },
         close: function() {
