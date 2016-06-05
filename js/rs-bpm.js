@@ -214,7 +214,18 @@ function editActivity(id_){
     $.get("../template/activityProperties.html", function(data){
         data = data.replace("#activityDescp", activity.find("label").html());
         dialog_div.append(data);
+        //load added properties
+        var activityData = $.grep(variableSet, function(value) {
+            return value.activityId = id_;
+        });
+        if(activityData==undefined || activityData==null || activityData.length==0){
+            //no saved data
+        }else{
+            loadProperties(activityData[0].properties);
+        }
     });
+
+
 
     dialog_div.dialog({
         autoOpen: false,
@@ -257,6 +268,7 @@ function editActivity(id_){
                     };
                 });
                 variableSet.push({activityId :activityId_ , properties:proArray});
+                $("#"+activityId_+" > label").html(activityDescp);
                 $(this).dialog("destroy");
             },
             Cancel: function () {
@@ -268,6 +280,7 @@ function editActivity(id_){
         }
     });
     $(dialog_div).dialog( "open" );
+
 }
 function editCondition(id_){
     var condition_ = $("#"+id_);
