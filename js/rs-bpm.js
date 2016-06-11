@@ -1,3 +1,5 @@
+var RS_TYPE_START = "start-task";
+var RS_TYPE_END = "end-task";
 var connectionSet = [];
 var variableSet = [];//activityId:[propertyArray(name,type,value)]
 jsPlumb.ready(function () {
@@ -16,7 +18,20 @@ jsPlumb.ready(function () {
                 return;
             }
             div_id = new Date().getTime();
-            clone_div.attr("id", div_id).append("<div class=\"ep\" action=\"begin\"></div>");
+            var rs_type = clone_div.attr("rs-type");
+            if(rs_type==RS_TYPE_START){
+                if($(this).find("div[action='"+RS_TYPE_START+"']").length!=0){
+                    console.log("start task already existed");
+                    return;
+                }
+            }
+            if(rs_type==RS_TYPE_END){
+                if($(this).find("div[action='"+RS_TYPE_END+"']").length!=0){
+                    console.log("end task already existed");
+                    return;
+                }
+            }
+            clone_div.attr("id", div_id).append("<div class=\"ep\" action=\""+rs_type+"\"></div>");
             $(this).append(clone_div);
             clone_div.removeClass("menu-task").removeClass("ui-draggable").css({"top":pos_y, "left":pos_x});
             clone_div.contextMenu({
@@ -111,9 +126,12 @@ jsPlumb.ready(function () {
         newNode(e.offsetX, e.offsetY);
     });*/
     // initialise element as connection targets and source.
-    var initNode = function(el) {
+    var initNode = function(el,type) {
         // initialise draggable elements.
         instance.draggable(el,{containment:"parent"});
+        if(type==""){
+
+        }
         instance.makeSource(el, {
             filter: ".ep",
             anchor: "Continuous",
@@ -216,7 +234,7 @@ function editActivity(id_){
         dialog_div.append(data);
         //load added properties
         var activityData = $.grep(variableSet, function(value) {
-            return value.activityId = id_;
+            return value.activityId == id_;
         });
         if(activityData==undefined || activityData==null || activityData.length==0){
             //no saved data
