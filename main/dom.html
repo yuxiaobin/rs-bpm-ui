@@ -8,54 +8,32 @@
         <link rel="stylesheet" href="../css/jsPlumbToolkit-defaults.css">
         <link rel="stylesheet" href="../css/main.css">
         <link rel="stylesheet" href="../css/jsPlumbToolkit-demo.css">
-        <link rel="stylesheet" href="../css/demo.css">
         <link rel="stylesheet" href="../css/jquery.contextMenu.css">
         <link rel="stylesheet" href="../css/rs-bpm.css">
         <link rel="stylesheet" href="../css/theme/base/jquery.ui.all.css">
         <link rel="stylesheet" href="../css/properties.css">
+        <link rel="stylesheet" href="../css/demo.css">
     </head>
     <body data-demo-id="statemachine" data-library="dom">
     <div class="jtk-demo-main">
         <!-- demo -->
         <div class="rsmenu">
-            <div class="w menu-task" rs-type="start-task"><label>Start</label></div>
             <div class="w menu-task" rs-type="user-task"><label>User Task</label></div>
-            <div class="w menu-task" rs-type="end-task"><label>End</label></div>
-            <!--<div class="rs-line rs-line-menu">line</div>-->
+            <div class="w menu-task rs-cond-task" rs-type="user-task"><div class="task-descp">Condition Node</div></div>
         </div>
         <div class="rscontainer jtk-demo-canvas canvas-wide statemachine-demo jtk-surface jtk-surface-nopan " id="canvas" ng-app="activityModeler">
-            <div class="w" id="opened"><label>BEGIN</label>
-                <div class="ep" action="begin"></div>
-            </div>
-            <div class="w" id="phone1"><label>PHONE INTERVIEW 1</label>
-                <div class="ep" action="phone1"></div>
-            </div>
-            <div class="w" id="phone2"><label>PHONE INTERVIEW 2</label>
-                <div class="ep" action="phone2"></div>
-            </div>
-            <div class="w" id="inperson"><label>IN PERSON</label>
-                <div class="ep" action="inperson"></div>
-            </div>
-            <div class="w" id="rejected"><label>REJECTED</label>
-                <div class="ep" action="rejected"></div>
-            </div>
+
         </div>
+
         <div>
             <input type="button" value="Remove All" id="removeAll">
+            <input type="button" value="Save" id="Save">
         </div>
     </div>
 
   <div id="context_menu_include">
 
   </div>
-    <!--<ul id="connMenu" class="contextMenu">
-        <li class=""><a href="#edit">Edit</a></li>
-        <li class=""><a href="#delete">Delete</a></li>
-    </ul>
-    <ul id="activityMenu" class="contextMenu">
-        <li class=""><a href="#edit">Edit</a></li>
-        <li class=""><a href="#delete">Delete</a></li>
-    </ul>-->
 
 <!-- JS -->
 <!-- support lib for bezier stuff -->

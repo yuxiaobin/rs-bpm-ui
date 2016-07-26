@@ -2,6 +2,12 @@ var RS_TYPE_START = "start-task";
 var RS_TYPE_END = "end-task";
 var connectionSet = [];
 var variableSet = [];//activityId:[propertyArray(name,type,value)]
+
+//TODO:get nodeList from server.
+var result_data = {"tasks":[{"id":"start-task","rsType":"start-task","descp":"Start","position":{"top":26,"left":312}},{"id":"end-task","rsType":"end-task","descp":"End","position":{"top":370,"left":350}},{"id":"userTask1","rsType":"user-task","descp":"userTask1","position":{"top":200,"left":550}},{"id":"userTask2","rsType":"user-task","descp":"userTask2","position":{"top":370,"left":550}},{"id":"condition","rsType":"rs-cond-task","descp":"condition adjust","position":{"top":173,"left":312}},{"id":"1469524101052","rsType":"rs-cond-task","descp":"Condition Node","position":{"top":231,"left":115}},{"id":"1469524108740","rsType":"user-task","descp":"User Task","position":{"top":376,"left":101}}],"conns":[{"con_id":"con_5","con_descp":"Start to process","con_value":"","source_id":"start-task","target_id":"condition"},{"con_id":"con_11","con_descp":"Yes","con_value":"","source_id":"condition","target_id":"end-task"},{"con_id":"con_17","con_descp":"No","con_value":"","source_id":"condition","target_id":"userTask1"},{"con_id":"con_23","con_descp":"Next step","con_value":"","source_id":"userTask1","target_id":"userTask2"},{"con_id":"con_29","con_descp":"Over","con_value":"","source_id":"userTask2","target_id":"end-task"},{"con_id":"con_35","con_descp":"Next","con_value":"","source_id":"condition","target_id":"1469524101052"},{"con_id":"con_41","con_descp":"Next","con_value":"","source_id":"1469524101052","target_id":"1469524108740"},{"con_id":"con_47","con_descp":"Next","con_value":"","source_id":"1469524108740","target_id":"end-task"}]}
+
+var nodeList = result_data.tasks;
+var connList = result_data.conns;
 jsPlumb.ready(function () {
 
     $(".menu-task").draggable({helper: 'clone'});
@@ -44,7 +50,7 @@ jsPlumb.ready(function () {
                 else if (action == 'delete') {
                     instance.remove(id_);
                 }
-            })
+            }).addClass("user-task");
             initNode(clone_div);
         }
     });
@@ -80,7 +86,7 @@ jsPlumb.ready(function () {
         Container: "canvas"
     });
 
-    instance.registerConnectionType("basic", { anchor:"Continuous", connector:"StateMachine" });
+//    instance.registerConnectionType("basic", { anchor:"Continuous", connector:"StateMachine" });
     window.jsp = instance;
     var canvas = document.getElementById("canvas");
     var windows = jsPlumb.getSelector(".statemachine-demo .w");
@@ -91,6 +97,35 @@ jsPlumb.ready(function () {
         console.log(c);
         //instance.detach(c);
     });
+
+//    var basicType = {
+//        connector: "StateMachine",
+//        paintStyle: { strokeStyle: "red", lineWidth: 4 },
+//        hoverPaintStyle: { strokeStyle: "blue" },
+//        overlays: [
+//            "Arrow"
+//        ]
+//    };
+//    instance.registerConnectionType("basic", basicType);
+
+    // this is the paint style for the connecting lines..
+    var connectorPaintStyle = {
+            lineWidth: 4,
+            strokeStyle: "#61B7CF",
+            joinstyle: "round",
+            outlineColor: "white",
+            outlineWidth: 2
+        },
+        connectorHoverStyle = {
+            lineWidth: 4,
+            strokeStyle: "#216477",
+            outlineWidth: 2,
+            outlineColor: "white"
+        },
+        endpointHoverStyle = {
+            fillStyle: "#216477",
+            strokeStyle: "#216477"
+        };
 
     // bind a connection listener. note that the parameter passed to this function contains more than
     // just the new connection - see the documentation for a full list of what is included in 'info'.
@@ -119,6 +154,18 @@ jsPlumb.ready(function () {
                     instance.detach(info);
                 }
             });
+        var con_source = info.source;
+        if($(con_source).hasClass("rs-cond-task")){
+            var targetConnections = $.grep(connectionSet, function(value) {
+                return value.connection.source.id == con_source.id;
+            });
+            if(targetConnections.length>1){
+                connection_label.firstChild.innerHTML = "No";
+            }else{
+                connection_label.firstChild.innerHTML = "Yes";
+            }
+        }
+
     });
 
     // bind a double click listener to "canvas"; add new node when this occurs.
@@ -135,21 +182,26 @@ jsPlumb.ready(function () {
         instance.makeSource(el, {
             filter: ".ep",
             anchor: "Continuous",
-            connectorStyle: { strokeStyle: "#5c96bc", lineWidth: 2, outlineColor: "transparent", outlineWidth: 4 },
-            connectionType:"basic",
-            extract:{
-                "action":"the-action"
-            },
-            maxConnections: 2,
-            onMaxConnections: function (info, e) {
-                alert("Maximum connections (" + info.maxConnections + ") reached");
-            }
+            connectorStyle:connectorPaintStyle,
+            connector: [ "Flowchart", { stub: [40, 60], gap: 10, cornerRadius: 5, alwaysRespectStubs: true } ],
+            hoverPaintStyle: endpointHoverStyle,
+            connectorHoverStyle: connectorHoverStyle,
+            maxConnections: 5,
+            //onMaxConnections: function (info, e) { alert("Maximum connections (" + info.maxConnections + ") reached");  },
+            overlays: [
+                [ "Label", {
+                    location: [0.5, 1.5],
+                    label: "Drag",
+                    cssClass: "endpointSourceLabel",
+                    visible:false
+                } ]
+            ]
         });
 
         instance.makeTarget(el, {
             dropOptions: { hoverClass: "dragHover" },
             anchor: "Continuous",
-            allowLoopback: true
+            allowLoopback: false//Not allow to connect to itself
         });
 
         // this is not part of the core demo functionality; it is a means for the Toolkit edition's wrapped
@@ -157,12 +209,16 @@ jsPlumb.ready(function () {
         instance.fire("jsPlumbDemoNodeAdded", el);
     };
 
-    var newNode = function(x, y) {
+    var newNodeById = function(id,type,descp, x, y) {
         var d = document.createElement("div");
-        var id = jsPlumbUtil.uuid();
-        d.className = "w";
+        d.className = "w "+type;
         d.id = id;
-        d.innerHTML = id.substring(0, 7) + "<div class=\"ep\"></div>";
+        if(type=="rs-cond-task"){
+            d.innerHTML = "<div class='task-descp'>"+descp + "</div><div class=\"ep\"></div>";
+        }else{
+            d.innerHTML = descp + "<div class=\"ep\"></div>";
+        }
+
         d.style.left = x + "px";
         d.style.top = y + "px";
         instance.getContainer().appendChild(d);
@@ -171,21 +227,17 @@ jsPlumb.ready(function () {
     };
 
     // suspend drawing and initialise.
-    //TODO: for testing only
     instance.batch(function () {
-        for (var i = 0; i < windows.length; i++) {
-            initNode(windows[i], true);
+        for(var i=0;i<nodeList.length;++i){
+            var node1 = nodeList[i];
+            newNodeById(node1.id, node1.rsType, node1.descp,node1.position.left,node1.position.top);
         }
-        // and finally, make a few connections
-        instance.connect({ source: "opened", target: "phone1", type:"basic" });
-        instance.connect({ source: "phone1", target: "phone1", type:"basic" });
-        instance.connect({ source: "phone1", target: "inperson", type:"basic" });
+        for(var i=0;i<connList.length;++i){
+            var conn_data = connList[i];
+            var conn_ = instance.connect({ source: conn_data.source_id, target: conn_data.target_id });
+            conn_.getOverlay("label").label = "<i>"+conn_data.con_descp+"</i>"
+        }
 
-        instance.connect({
-            source:"phone2",
-            target:"rejected",
-            type:"basic"
-        });
     });
 
     $(".statemachine-demo .w").each(function(){
@@ -212,6 +264,55 @@ jsPlumb.ready(function () {
 
     $("#removeAll").on("click",function(){
         instance.empty("canvas");
+    })
+
+    $("#Save").on("click",function(){
+        var save_data = {};
+        var save_tasks = [];
+        var save_conns = [];
+        var curr_conns = instance.getConnections();
+        for(var i=0;i<curr_conns.length;++i){
+            var conn_ = curr_conns[i];
+            var conn_json = {};
+            conn_json.con_id = conn_.id;
+            conn_json.con_descp = $(conn_.getOverlay("label").label).text();
+            conn_json.con_value = "";//TODO:
+            conn_json.source_id = conn_.source.id;
+            conn_json.target_id = conn_.target.id;
+            save_conns[save_conns.length] = conn_json;
+        }
+        $("#canvas .w").each(function(){
+            var task_json = {};
+            var jqObj = $(this);
+            var pos_ = jqObj.position();
+            task_json.id = jqObj.attr("id");
+            if(jqObj.hasClass("start-task")){
+                task_json.rsType ="start-task";
+            }
+            else if(jqObj.hasClass("end-task")){
+                task_json.rsType ="end-task";
+            }
+            else if(jqObj.hasClass("rs-cond-task")){
+                pos_.top = parseInt(pos_.top)+13;// add for rotation divide issue
+                pos_.left = parseInt(pos_.left)+13;
+                task_json.rsType ="rs-cond-task";
+            }
+            else{
+                task_json.rsType ="user-task";
+            }
+            task_json.descp = jqObj.text();
+
+            var task_position = {
+                top:pos_.top,
+                left:pos_.left
+            };
+            task_json.position = pos_;
+            save_tasks[save_tasks.length] = task_json;
+        });
+        save_data.tasks = save_tasks;
+        save_data.conns = save_conns;
+//        console.log(save_data);
+        console.log(JSON.stringify(save_data));
     })
 });
 /*function newProperty(){
