@@ -228,16 +228,26 @@ jsPlumb.ready(function () {
 
     // suspend drawing and initialise.
     instance.batch(function () {
-        for(var i=0;i<nodeList.length;++i){
-            var node1 = nodeList[i];
-            newNodeById(node1.id, node1.rsType, node1.descp,node1.position.left,node1.position.top);
+        if(nodeList==undefined){
+            nodeList = [];
         }
-        for(var i=0;i<connList.length;++i){
-            var conn_data = connList[i];
-            var conn_ = instance.connect({ source: conn_data.source_id, target: conn_data.target_id });
-            conn_.getOverlay("label").label = "<i>"+conn_data.con_descp+"</i>"
+        var nodeSize = nodeList.length;
+        if(nodeSize!=undefined && nodeSize!=0){
+            for(var i=0;i<nodeList.length;++i){
+                var node1 = nodeList[i];
+                newNodeById(node1.id, node1.rsType, node1.descp,node1.position.left,node1.position.top);
+            }
+            for(var i=0;i<connList.length;++i){
+                var conn_data = connList[i];
+                var conn_ = instance.connect({ source: conn_data.source_id, target: conn_data.target_id });
+                conn_.getOverlay("label").label = "<i>"+conn_data.con_descp+"</i>"
+            }
+        }else{
+            var startNode = {id:RS_TYPE_START,rsType:RS_TYPE_START,descp:"Start Node", position:{top:70,left:350}};
+            var endNode = {id:RS_TYPE_END,rsType:RS_TYPE_END,descp:"End Node", position:{top:370,left:350}};
+            newNodeById(startNode.id, startNode.rsType, startNode.descp,startNode.position.left,startNode.position.top);
+            newNodeById(endNode.id, endNode.rsType, endNode.descp,endNode.position.left,endNode.position.top);
         }
-
     });
 
     $(".statemachine-demo .w").each(function(){
@@ -264,7 +274,7 @@ jsPlumb.ready(function () {
 
     $("#removeAll").on("click",function(){
         instance.empty("canvas");
-    })
+    });
 
     $("#Save").on("click",function(){
         var save_data = {};
@@ -286,11 +296,11 @@ jsPlumb.ready(function () {
             var jqObj = $(this);
             var pos_ = jqObj.position();
             task_json.id = jqObj.attr("id");
-            if(jqObj.hasClass("start-task")){
-                task_json.rsType ="start-task";
+            if(jqObj.hasClass(RS_TYPE_START)){
+                task_json.rsType = RS_TYPE_START;
             }
-            else if(jqObj.hasClass("end-task")){
-                task_json.rsType ="end-task";
+            else if(jqObj.hasClass(RS_TYPE_END)){
+                task_json.rsType = RS_TYPE_END;
             }
             else if(jqObj.hasClass("rs-cond-task")){
                 pos_.top = parseInt(pos_.top)+13;// add for rotation divide issue
@@ -313,7 +323,17 @@ jsPlumb.ready(function () {
         save_data.conns = save_conns;
 //        console.log(save_data);
         console.log(JSON.stringify(save_data));
-    })
+    });
+
+    $("#resetBtn").on("click",function(){
+        $("#canvas .w").each(function(){
+            if($(this).hasClass(RS_TYPE_START) || $(this).hasClass(RS_TYPE_END)){
+                //start&end no need to remove
+            }else{
+                instance.remove($(this).attr("id"));
+            }
+        });
+    });
 });
 /*function newProperty(){
     var tr_1 = $("<tr>");
